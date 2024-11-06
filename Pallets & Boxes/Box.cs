@@ -53,6 +53,22 @@ namespace Pallets___Boxes
             get { return _width; }
             set
             {
+                if (_belongsTo != null)
+                {
+                    var badArgument = new ArgumentException("Box can't find on the pallet with such width: " + value, "Width");
+                    var nonPositiveArgument = new ArgumentOutOfRangeException("Width", value, "Width can't be less or equal 0");
+                    if (value <= 0)
+                    {
+                        throw nonPositiveArgument;
+                    }
+                    if ((_length > _belongsTo.Length && _belongsTo.Length < value) || // check if both new width and old length are bigger than pallet's length
+                        (_length > _belongsTo.Width && _belongsTo.Width < value) || // check if both new width and old length are bigger than pallet's width
+                        (value > _belongsTo.Width && _length > _belongsTo.Length) || // check if new width bigger than 
+                        (value > _belongsTo.Length && _length > _belongsTo.Width))
+                    {
+                        throw badArgument;
+                    }
+                }
                 // TODO: implement logic for checking if box fits onto pallet
                 _width = value;
                 Volume = _height * _width * _length;

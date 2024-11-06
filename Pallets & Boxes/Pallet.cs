@@ -34,8 +34,17 @@ namespace Pallets___Boxes
             get { return _width; }
             set
             {
-                if
                 _width = value;
+                Volume = _height * _width * _length;
+            }
+        }
+
+        public double Length
+        {
+            get { return _length; }
+            set
+            {
+                _length = value;
                 Volume = _height * _width * _length;
             }
         }
