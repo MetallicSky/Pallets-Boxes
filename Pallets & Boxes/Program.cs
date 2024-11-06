@@ -1,16 +1,25 @@
 ﻿using Pallets___Boxes;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
 
 class Program
 {
-    public static List<Pallet> GeneratePalletList(in int num = 1000)
+    public static void SortPalletsBy<T>(Func<Pallet, T> keySelector, List<Pallet> pallets, bool descending = false) where T : IComparable<T>
+    {
+        pallets.Sort((pallet1, pallet2) =>
+        {
+            int result = keySelector(pallet1).CompareTo(keySelector(pallet2));
+            return descending ? -result : result;
+        });
+    }
+    public static SortedDictionary<DateOnly, List<Pallet>> GeneratePalletDictionary(out List<Pallet> PalletList, in int num = 1000)
     {
         if (num < 0)
         {
             throw new ArgumentException("number of generated pallets can't be negative", nameof(num));
         }
         Random rnd = new();
-        var pallets = new List<Pallet>();
+        PalletList = [];
 
         for (int i = 0; i < num; i++)
         {
@@ -25,10 +34,35 @@ class Program
             {
                 new Box(pallet);
             }
-            pallets.Add(pallet);
+
+            pallet.SortBoxesBy(box => box.Weight);
+            PalletList.Add(pallet);
 
         }
-        return pallets;
+        SortPalletsBy(pallet => pallet.TotalWeight, PalletList);
+        SortedDictionary<DateOnly, List<Pallet>> PalletGroups = [];
+        for (int i = 0; i < PalletList.Count; i++)
+        {
+            DateOnly date = PalletList[i].ExpDate.GetValueOrDefault();
+            if (!PalletGroups.ContainsKey(date))
+            {
+                // If not, initialize the key with an empty list
+                PalletGroups[date] = new List<Pallet>();
+            }
+            PalletGroups[date].Add(PalletList[i]);
+        }
+        return PalletGroups;
+    }
+
+    public static void PrintPallets(in SortedDictionary<DateOnly, List<Pallet>> PalletGroups)
+    {
+        foreach (var group in PalletGroups)
+        {
+            Console.WriteLine("============================");
+            Console.WriteLine("Expiration Date: " + group.Key);
+            Console.WriteLine("============================");
+            PrintPallets(group.Value);
+        }
     }
 
     public static void PrintPallets(in List<Pallet> pallets)
@@ -40,12 +74,15 @@ class Program
         }
     }
 
+
     static void Main(string[] args)
     {
         if (args.Length == 0)
         {
             ConsoleInterface.PrintLogo();
             ConsoleInterface.PrintMenu();
+            SortedDictionary<DateOnly, List<Pallet>>? palletGroups = [];
+            List<Pallet> pallets = [];
             while (true)
             {
                 string line = Console.ReadLine();
@@ -61,10 +98,10 @@ class Program
                     case 0:
                         return;
                     case 1:
-                        PrintPallets(GeneratePalletList());
+                        palletGroups = GeneratePalletDictionary(out pallets);
+                        Console.WriteLine("Data has been generated ");
                         Console.WriteLine("Press any key to continue...");
                         Console.ReadKey();
-                        // TODO: implement generate random entries
                         break;
                     case 2:
                         // TODO: implement json data input
@@ -73,9 +110,26 @@ class Program
                         // TODO: implement db data input
                         break;
                     case 4:
+                        PrintPallets(palletGroups); // in current implementation, all data is sorted and grouped right after generation
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey();
                         // TODO: implement all data group, sort and print
                         break;
                     case 5:
+                        if (pallets.Count < 3)
+                        {
+                            Console.WriteLine("There was less than 3 pallets generated!");
+                            break;
+                        }
+                        SortPalletsBy(pallet => pallet.ExpDate.GetValueOrDefault(), pallets, true);
+                        List<Pallet> top3Pallets = [];
+                        top3Pallets.Add(pallets[0]);
+                        top3Pallets.Add(pallets[1]);
+                        top3Pallets.Add(pallets[2]);
+                        pallets[0].SortBoxesBy(box => box.Weight);
+                        pallets[1].SortBoxesBy(box => box.Weight);
+                        pallets[2].SortBoxesBy(box => box.Weight);
+                        PrintPallets(top3Pallets);
                         // TODO: implement top 3 pallets print
                         break;
                     default:

@@ -246,9 +246,9 @@ namespace Pallets___Boxes
         /// <summary>
         /// Sorts boxes list by specified parameter. Example: SortBoxesBy(box => box.ExpDate, (x, y) => y.CompareTo(x)) // Descending order, SortBoxesBy(box => box.ExpDate, (x, y) => x.CompareTo(y)); // ascending order
         /// </summary>
-        public void SortBoxesBy<T>(Func<Box, T> keySelector, Func<T, T, int> comparer)
+        public void SortBoxesBy<T>(Func<Box, T> keySelector) where T : IComparable<T>
         {
-            _boxes.Sort((box1, box2) => comparer(keySelector(box1), keySelector(box2)));
+            _boxes.Sort((box1, box2) => keySelector(box1).CompareTo(keySelector(box2)));
         }
         /// <summary>
         /// Checks whole list of boxes if they fit onto current pallet (usually used after pallet size change)
@@ -284,14 +284,14 @@ namespace Pallets___Boxes
         public void PrintPallet()
         {
             string output = "ID: " + Id;
-            output += " TW: " + (double)Math.Round(TotalWeight, 2);
-            output += " PW: " + (double)Math.Round(PalletWeight, 2);
-            output += " kg ED: " + ExpDate;
-            output += " TV: " + (double)Math.Round(TotalVolume, 2);
-            output += " m3 PV: " + (double)Math.Round(PalletVolume, 2);
-            output += " m3 (H: " + (double)Math.Round(Height, 2);
-            output += " m L: " + (double)Math.Round(Length, 2);
-            output += " m W: " + (double)Math.Round(Width, 2);
+            output += " Total Weight: " + (double)Math.Round(TotalWeight, 2);
+            output += " Pallet Weight: " + (double)Math.Round(PalletWeight, 2);
+            output += " kg Exp. Date: " + ExpDate;
+            output += " Total Volume: " + (double)Math.Round(TotalVolume, 2);
+            output += " m3 Pallet Volume: " + (double)Math.Round(PalletVolume, 2);
+            output += " m3 (Height: " + (double)Math.Round(Height, 2);
+            output += " m Length: " + (double)Math.Round(Length, 2);
+            output += " m Width: " + (double)Math.Round(Width, 2);
             output += " m)";
             Console.WriteLine(output);
             for (int i = 0; i < _boxes.Count; i++)

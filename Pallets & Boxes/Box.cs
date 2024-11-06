@@ -195,13 +195,13 @@ namespace Pallets___Boxes
         public void PrintBox()
         {
             string output = "ID: " + Id;
-            output += "W: " + (double)Math.Round(Weight, 2);
-            output += " kg ED: " + ExpDate;
-            output += " V: " + (double)Math.Round(Volume, 2);
-            output += " m3 (H: " + (double)Math.Round(Height, 2);
-            output += " m L: " + (double)Math.Round(Length, 2);
-            output += " m W: " + (double)Math.Round(Width, 2);
-            output += ")";
+            output += " Weight: " + (double)Math.Round(Weight, 2);
+            output += " kg Exp. Date: " + ExpDate;
+            output += " Volume: " + (double)Math.Round(Volume, 2);
+            output += " m3 (Height: " + (double)Math.Round(Height, 2);
+            output += " m Length: " + (double)Math.Round(Length, 2);
+            output += " m Width: " + (double)Math.Round(Width, 2);
+            output += " m)";
             Console.WriteLine(output);
         }
     }
