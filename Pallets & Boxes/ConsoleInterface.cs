@@ -8,55 +8,6 @@ namespace Pallets___Boxes
 {
     public static class ConsoleInterface
     {
-        /// <summary>
-        /// Prints banner in console. If cursor position was not initialized before (==1) then assigns it after banner print
-        /// </summary>
-        /// <param name="banner">String representing banner. If not specified, will print default banner</param>
-        public static void PrintLogo(string banner = "")
-        {
-            if (banner == "") // default banner if nothing or empty string was received
-            {
-                banner = _banner;
-            }
-
-            Console.WriteLine(banner);
-            if (initialCursorPos == -1) // if initial cursor position was not set before, set it now
-                SetInitialCursorPosition();
-        }
-
-        /// <summary>
-        /// Clears console from the end until it reaches initial cursor position
-        /// </summary>
-        public static void Refresh()
-        {
-            Console.Clear();
-            PrintLogo();
-            PrintMenu();
-        }
-
-        /// <summary>
-        /// Assigns initial cursor position for later use in Refresh()
-        /// </summary>
-        public static void SetInitialCursorPosition()
-        {
-            initialCursorPos = Console.GetCursorPosition().Top;
-        }
-
-        /// <summary>
-        /// Resets cursor position (useful when you want to print change banner)
-        /// </summary>
-        public static void ResetInitialCursorPosition()
-        {
-            initialCursorPos = -1;
-        }
-        /// <summary>
-        /// Print program menu
-        /// </summary>
-        public static void PrintMenu()
-        {
-
-            Console.WriteLine(_menu);
-        }
         private static string _banner =
                     "       ╔═════════╗╔═══╗\n" +
                     "       ║ Pallets ║║ & ║\n" +
@@ -65,12 +16,6 @@ namespace Pallets___Boxes
                     "    ║       Boxes       ║\n" +
                     "    ╚═══════════════════╝\n" +
                     "   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒\n\n";
-        public static string Banner
-        {
-            get => _banner;
-            set => _banner = value;
-        }
-
         private static string _menu =
                     "Choose one of the following options (enter option number):\n" +
                     "  1 - Generate data with 1000 random entries\n" +
@@ -86,7 +31,52 @@ namespace Pallets___Boxes
             get => _menu;
             set => _menu = value;
         }
+        public static string Banner
+        {
+            get => _banner;
+            set => _banner = value;
+        }
+        /// <summary>
+        /// Prints banner in console. If cursor position was not initialized before (==1) then assigns it after banner print
+        /// </summary>
+        /// <param name="banner">String representing banner. If not specified, will print default banner</param>
+        public static void PrintLogo(string banner = "")
+        {
+            if (banner == "") // default banner if nothing or empty string was received
+            {
+                banner = _banner;
+            }
 
-        private static int initialCursorPos = -1;
+            Console.WriteLine(banner);
+        }
+        /// <summary>
+        /// Print program menu
+        /// </summary>
+        public static void PrintMenu()
+        {
+            Console.WriteLine(_menu);
+        }
+        /// <summary>
+        /// Clears console and prints banner with menu
+        /// </summary>
+        public static void Refresh()
+        {
+            Console.Clear();
+            PrintLogo();
+            PrintMenu();
+        }
+        /// <summary>
+        /// Pauses Program and prompts user to press any key to continue
+        /// </summary>
+        /// <param name="message">String representing prompt message. If not specified, will print default text</param>
+        public static void PressAnyKey(string message = "")
+        {
+            if (message == "")
+            {
+                message = "Press any key to continue...";
+            }
+            Console.WriteLine(message);
+            Console.ReadKey();
+        }
     }
 }

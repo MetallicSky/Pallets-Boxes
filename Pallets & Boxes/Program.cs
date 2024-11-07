@@ -1,6 +1,7 @@
 ﻿using Pallets___Boxes;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Dynamic;
 
 class Program
 {
@@ -12,14 +13,14 @@ class Program
             return descending ? -result : result;
         });
     }
-    public static SortedDictionary<DateOnly, List<Pallet>> GeneratePalletDictionary(out List<Pallet> PalletList, in int num = 1000)
+    public static List<Pallet> GeneratePalletDictionary( in int num = 1000)
     {
         if (num < 0)
         {
             throw new ArgumentException("number of generated pallets can't be negative", nameof(num));
         }
         Random rnd = new();
-        PalletList = [];
+        List<Pallet> PalletList = [];
 
         for (int i = 0; i < num; i++)
         {
@@ -39,19 +40,7 @@ class Program
             PalletList.Add(pallet);
 
         }
-        SortPalletsBy(pallet => pallet.TotalWeight, PalletList);
-        SortedDictionary<DateOnly, List<Pallet>> PalletGroups = [];
-        for (int i = 0; i < PalletList.Count; i++)
-        {
-            DateOnly date = PalletList[i].ExpDate.GetValueOrDefault();
-            if (!PalletGroups.ContainsKey(date))
-            {
-                // If not, initialize the key with an empty list
-                PalletGroups[date] = new List<Pallet>();
-            }
-            PalletGroups[date].Add(PalletList[i]);
-        }
-        return PalletGroups;
+        return PalletList;
     }
 
     public static void PrintPallets(in SortedDictionary<DateOnly, List<Pallet>> PalletGroups)
@@ -73,13 +62,46 @@ class Program
             pallets[i].PrintPallet();
         }
     }
+    public static SortedDictionary<DateOnly, List<Pallet>> GroupSort(List<Pallet> input)
+    {
+        SortedDictionary<DateOnly, List<Pallet>> output = [];
 
+        SortPalletsBy(pallet => pallet.TotalWeight, input);
+        for (int i = 0; i < input.Count; i++)
+        {
+            DateOnly date = input[i].ExpDate.GetValueOrDefault();
+            if (!output.TryGetValue(date, out List<Pallet>? value))
+            {
+                value = [];
+                output[date] = value;
+            }
+
+            value.Add(input[i]);
+        }
+        return output;
+    }
+
+    public static List<Pallet> GetFreshestPallets(in List<Pallet> input, in int amount = 3)
+    {
+        List<Pallet> output = [];
+        if (input.Count < amount)
+        {
+            return output;
+        }
+        SortPalletsBy(pallet => pallet.ExpDate.GetValueOrDefault(), input, true);
+
+        for (int i = 0; i < amount; i++)
+        {
+            output.Add(input[i]);
+            output[i].SortBoxesBy(box => box.Weight);
+        }
+        return output;
+    }
 
     static void Main(string[] args)
     {
         if (args.Length == 0)
         {
-            SortedDictionary<DateOnly, List<Pallet>>? palletGroups = [];
             List<Pallet> pallets = [];
             ConsoleInterface.Refresh();
             while (true)
@@ -96,10 +118,9 @@ class Program
                     case 0:
                         return;
                     case 1:
-                        palletGroups = GeneratePalletDictionary(out pallets);
-                        Console.WriteLine("Data has been generated ");
-                        Console.WriteLine("Press any key to continue...");
-                        Console.ReadKey();
+                        pallets = GeneratePalletDictionary();
+                        Console.WriteLine("Data has been generated");
+                        ConsoleInterface.PressAnyKey();
                         break;
                     case 2:
                         // TODO: implement json data input
@@ -108,27 +129,25 @@ class Program
                         // TODO: implement db data input
                         break;
                     case 4:
-                        PrintPallets(palletGroups); // in current implementation, all data is sorted and grouped right after generation
-                        Console.WriteLine("Press any key to continue...");
-                        Console.ReadKey();
-                        break;
-                    case 5:
-                        if (pallets.Count < 3)
+                        if (pallets.Count == 0)
                         {
-                            Console.WriteLine("There was less than 3 pallets generated!");
+                            Console.WriteLine("No data has been generated so far!");
                             continue;
                         }
-                        SortPalletsBy(pallet => pallet.ExpDate.GetValueOrDefault(), pallets, true);
-                        List<Pallet> top3Pallets = [];
-                        top3Pallets.Add(pallets[0]);
-                        top3Pallets.Add(pallets[1]);
-                        top3Pallets.Add(pallets[2]);
-                        pallets[0].SortBoxesBy(box => box.Weight);
-                        pallets[1].SortBoxesBy(box => box.Weight);
-                        pallets[2].SortBoxesBy(box => box.Weight);
-                        PrintPallets(top3Pallets);
-                        Console.WriteLine("Press any key to continue...");
-                        Console.ReadKey();
+                        SortedDictionary<DateOnly, List<Pallet>> palletGroups = GroupSort(pallets);
+                        PrintPallets(palletGroups);
+                        ConsoleInterface.PressAnyKey();
+                        break;
+                    case 5:
+                        int amount = 3;
+                        List<Pallet> freshest = GetFreshestPallets(pallets, amount);
+                        if (freshest.Count == 0)
+                        {
+                            Console.WriteLine("There was less than " + amount + " pallets generated!");
+                            continue;
+                        }
+                        PrintPallets(freshest);
+                        ConsoleInterface.PressAnyKey();
                         break;
                     default:
                         Console.WriteLine("Unknown option number entered: " + input[0] + "\n\n");
