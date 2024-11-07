@@ -1,18 +1,7 @@
 ﻿using Pallets___Boxes;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Dynamic;
 
 class Program
 {
-    public static void SortPalletsBy<T>(Func<Pallet, T> keySelector, List<Pallet> pallets, bool descending = false) where T : IComparable<T>
-    {
-        pallets.Sort((pallet1, pallet2) =>
-        {
-            int result = keySelector(pallet1).CompareTo(keySelector(pallet2));
-            return descending ? -result : result;
-        });
-    }
     public static List<Pallet> GeneratePalletDictionary( in int num = 1000)
     {
         if (num < 0)
@@ -43,25 +32,15 @@ class Program
         return PalletList;
     }
 
-    public static void PrintPallets(in SortedDictionary<DateOnly, List<Pallet>> PalletGroups)
+    public static void SortPalletsBy<T>(Func<Pallet, T> keySelector, List<Pallet> pallets, bool descending = false) where T : IComparable<T>
     {
-        foreach (var group in PalletGroups)
+        pallets.Sort((pallet1, pallet2) =>
         {
-            Console.WriteLine("============================");
-            Console.WriteLine("Expiration Date: " + group.Key);
-            Console.WriteLine("============================");
-            PrintPallets(group.Value);
-        }
+            int result = keySelector(pallet1).CompareTo(keySelector(pallet2));
+            return descending ? -result : result;
+        });
     }
 
-    public static void PrintPallets(in List<Pallet> pallets)
-    {
-        Console.WriteLine("Total pallets: " + pallets.Count);
-        for (int i = 0; i < pallets.Count; i++)
-        {
-            pallets[i].PrintPallet();
-        }
-    }
     public static SortedDictionary<DateOnly, List<Pallet>> GroupSort(List<Pallet> input)
     {
         SortedDictionary<DateOnly, List<Pallet>> output = [];
@@ -96,6 +75,26 @@ class Program
             output[i].SortBoxesBy(box => box.Weight);
         }
         return output;
+    }
+
+    public static void PrintPallets(in SortedDictionary<DateOnly, List<Pallet>> PalletGroups)
+    {
+        foreach (var group in PalletGroups)
+        {
+            Console.WriteLine("============================");
+            Console.WriteLine("Expiration Date: " + group.Key);
+            Console.WriteLine("============================");
+            PrintPallets(group.Value);
+        }
+    }
+
+    public static void PrintPallets(in List<Pallet> pallets)
+    {
+        Console.WriteLine("Total pallets: " + pallets.Count);
+        for (int i = 0; i < pallets.Count; i++)
+        {
+            pallets[i].PrintPallet();
+        }
     }
 
     static void Main(string[] args)
@@ -155,7 +154,6 @@ class Program
                 }
                 ConsoleInterface.Refresh();
             }
-            return;
         }
         string fileName = args[0];
         if (Path.HasExtension(fileName))
