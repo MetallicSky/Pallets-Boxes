@@ -29,12 +29,9 @@ namespace Pallets___Boxes
         /// </summary>
         public static void Refresh()
         {
-            for (int i = initialCursorPos; i < Console.WindowHeight; i++)
-            {
-                Console.SetCursorPosition(0, i);
-                Console.Write(new string(' ', Console.WindowWidth));
-            }
-            Console.SetCursorPosition(0, initialCursorPos);
+            Console.Clear();
+            PrintLogo();
+            PrintMenu();
         }
 
         /// <summary>

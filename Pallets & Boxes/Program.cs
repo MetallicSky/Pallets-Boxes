@@ -79,10 +79,9 @@ class Program
     {
         if (args.Length == 0)
         {
-            ConsoleInterface.PrintLogo();
-            ConsoleInterface.PrintMenu();
             SortedDictionary<DateOnly, List<Pallet>>? palletGroups = [];
             List<Pallet> pallets = [];
+            ConsoleInterface.Refresh();
             while (true)
             {
                 string line = Console.ReadLine();
@@ -90,7 +89,6 @@ class Program
                 bool isCorrect;
                 isCorrect = int.TryParse(input[0], out int mode);
                 ConsoleInterface.Refresh();
-                ConsoleInterface.PrintMenu();
                 if (isCorrect == false)
                     mode = -1;
                 switch (mode)
@@ -113,13 +111,12 @@ class Program
                         PrintPallets(palletGroups); // in current implementation, all data is sorted and grouped right after generation
                         Console.WriteLine("Press any key to continue...");
                         Console.ReadKey();
-                        // TODO: implement all data group, sort and print
                         break;
                     case 5:
                         if (pallets.Count < 3)
                         {
                             Console.WriteLine("There was less than 3 pallets generated!");
-                            break;
+                            continue;
                         }
                         SortPalletsBy(pallet => pallet.ExpDate.GetValueOrDefault(), pallets, true);
                         List<Pallet> top3Pallets = [];
@@ -130,12 +127,14 @@ class Program
                         pallets[1].SortBoxesBy(box => box.Weight);
                         pallets[2].SortBoxesBy(box => box.Weight);
                         PrintPallets(top3Pallets);
-                        // TODO: implement top 3 pallets print
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey();
                         break;
                     default:
                         Console.WriteLine("Unknown option number entered: " + input[0] + "\n\n");
-                        break;
+                        continue;
                 }
+                ConsoleInterface.Refresh();
             }
             return;
         }
